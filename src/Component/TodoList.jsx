@@ -188,11 +188,11 @@ const TodoList = () => {
                 !dataEdit ?
                 <button onClick={handleClick} 
                 className='p-[10px] bg-blue-600 cursor-pointer w-[150px] rounded-3xl text-white font-bold hover:bg-[#00264f] ' 
-                type="button">Submite</button> 
+                type="submite">Submite</button> 
                 :
                 <button onClick={handleUpdate} 
                 className='p-[10px] bg-green-900 cursor-pointer w-[150px] rounded-3xl text-white font-bold hover:bg-green-600 ' 
-                type="button">Update</button>
+                type="submite">Update</button>
                 } 
 
               </form>
