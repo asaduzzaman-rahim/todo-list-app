@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { ToastContainer, toast, Bounce } from 'react-toastify';
-import { getDatabase, ref, set, push, onValue, Database, remove  } from "firebase/database";
+import { getDatabase, ref, set, push, onValue, Database, remove, update   } from "firebase/database";
 import { MdModeEditOutline, MdDelete} from "react-icons/md";
+import { GrClear } from "react-icons/gr";
+
 
 
 const TodoList = () => {
@@ -12,6 +14,11 @@ const TodoList = () => {
     const [alldata, setAlldata] = useState([])
 
     const [dataEdit, setDataEdit] = useState(false)
+    const [updateValueName, setUpdateValueName] = useState("")
+    const [updateValueInstitute, setUpdateValueInstitute] = useState("")
+    const [updateValueNumber, setUpdateValueNumber] = useState("")
+    const [updateId, setUpdateId] = useState(0)
+
 
     const nameHandle=(e)=>{
       setName(e.target.value)
@@ -24,7 +31,7 @@ const TodoList = () => {
     }
 
       const notify = () => 
-        name =="" && institute =="" && number =="" ?        
+        name =="" || institute =="" || number =="" ?        
         toast.error("Please Enter the Section", {
               position: "top-right",
               autoClose: 3000,
@@ -35,7 +42,8 @@ const TodoList = () => {
               progress: undefined,
               theme: "dark",
               transition: Bounce,
-              }) :
+              }) 
+              :
         toast.success('Successfully Submite this task', {
               position: "top-right",
               autoClose: 3000,
@@ -51,10 +59,10 @@ const TodoList = () => {
       //  ! Data  Section Send with Database Start       
       const handleClick=(e)=>{
         e.preventDefault() 
-        if(!name && !institute && !number){
+        if(!name || !institute || !number){
           notify()     
         }else{
-          // notify();
+          
           const db = getDatabase();
           set(push(ref(db, 'todos/'), {
                 Number: number,
@@ -62,6 +70,9 @@ const TodoList = () => {
                 Username: name,
               }).then(() => {
                 notify();
+                  setNumber("");
+                  setInstitute("");
+                  setName("")
               }))
             }
           }
@@ -87,20 +98,55 @@ const TodoList = () => {
       
       //  ! Submite BTN Change to Update BTN Database Start
 
-      const updateData = ()=>{
-        setDataEdit(!dataEdit)
-        
-      }          
+      const updateData = (name, institute, number, id)=>{
+        // toggol btn start
+        setDataEdit(true)
+        // toggol btn end
+        setUpdateId(id)
+
+        setUpdateValueName(name)
+        setUpdateValueInstitute(institute)
+        setUpdateValueNumber(number)
+        }
+              
       //  ! Submite BTN Change to Update BTN Database End  
 
 
-      // ! Update Edit data section start
-          const handleUpdate=()=>{
-            console.log("Its Data Working now!");
-            
+      // ! Update Edit data  send to dataBase section start
+          const handleUpdate=(e, id)=>{
+            e.preventDefault()
+              const db = getDatabase();
+              update(ref(db, 'todos/'+ id),{
+                Number: updateValueNumber,
+                Institute: updateValueInstitute,
+                Username: updateValueName,
+              }).then(()=>{
+                toast.success('Successfully Update this task', {
+                  position: "top-right",
+                  autoClose: 3000,
+                  hideProgressBar: false,
+                  closeOnClick: false,
+                  pauseOnHover: true,
+                  draggable: true,
+                  progress: undefined,
+                  theme: "dark",
+                  transition: Bounce,
+                  });
+              })
           }
 
       // ! Update Edit data section End
+
+      // ! Update Edit data Clear section start
+      const handleUpdateClear =()=>{
+        setDataEdit(false)
+
+        // setUpdateValueName(" ")
+        // setUpdateValueInstitute(" ")
+        // setUpdateValueNumber(" ")
+      }
+
+      // ! Update Edit data Clear section End
 
 
       // ! Data Delete Btn with server section Start
@@ -149,51 +195,59 @@ const TodoList = () => {
                     !dataEdit ?
                       <div  className='grid lg:grid-cols-1 md:grid-cols-3 sm:grid-cols-1 justify-center items-center md:gap-x-10 my-7 mx-auto'>
                         <div>
-                          <label className='block text-xl font-bold' htmlFor="text">Enter Your Name  </label>
+                          <label className='block text-[18px] font-bold' htmlFor="text">Enter Your Name  </label>
                           <input onChange={nameHandle} placeholder='Enter Full Name'
-                          className='max-w-[300px] h-[30px] rounded-xl bg-white my-2.5 p-2.5 border-2 block border-[#ccc]' type="text" />
+                          className='max-w-[350px] h-[30px] rounded-xl bg-white my-2.5 p-2.5 border-2 block border-[#ccc]' type="text" />
                       </div>
                       <div>
-                          <label className='block text-xl font-bold' htmlFor="text">Institute Name  </label>
+                          <label className='block text-[18px] font-bold' htmlFor="text">Institute Name  </label>
                           <input onChange={instituteName} placeholder='Enter Institute Name'
-                          className='max-w-[300px] h-[30px] rounded-xl bg-white my-2.5 p-2.5 border-2 block border-[#ccc]' type="text" />
+                          className='max-w-[350px] h-[30px] rounded-xl bg-white my-2.5 p-2.5 border-2 block border-[#ccc]' type="text" />
                       </div>
                       <div>
-                          <label className='block text-xl font-bold' htmlFor="number">Number  </label>
+                          <label className='block text-[18px] font-bold' htmlFor="number">Number  </label>
                           <input onChange={Number} placeholder='Enter Mobile Number'
-                          className='max-w-[300px] h-[30px] rounded-xl bg-white my-2.5 p-2.5 border-2 block border-[#ccc]' type="number" />
+                          className='max-w-[350px] h-[30px] rounded-xl bg-white my-2.5 p-2.5 border-2 block border-[#ccc]' type="number" />
                       </div>
                     </div> 
                     :
                       <div  className='grid lg:grid-cols-1 md:grid-cols-3 sm:grid-cols-1 justify-center items-center md:gap-x-10 my-7 mx-auto'>
                         <div>
-                          <label className='block text-xl font-bold' htmlFor="text">Update Your Name  </label>
-                          <input onChange={nameHandle} placeholder='Update Full Name'
-                          className=' h-[30px] bg-white my-2.5 p-2.5 border-2 block border-[#ccc]' type="text" />
+                          <label className='block text-[18px] font-bold' htmlFor="text">Update Your Name  </label>
+                          <input value={updateValueName} onChange={(e)=> setUpdateValueName(e.target.value)} placeholder='Update Full Name'
+                          className='max-w-[350px] h-[30px] bg-white my-2.5 p-2.5 border-2 block border-[#ccc]' type="text" />
                       </div>
                       <div>
-                          <label className='block text-xl font-bold' htmlFor="text">Updata Institute Name  </label>
-                          <input onChange={instituteName} placeholder='Update Institute Name'
-                          className=' h-[30px] bg-white my-2.5 p-2.5 border-2 block border-[#ccc]' type="text" />
+                          <label className='block text-[18px] font-bold' htmlFor="text">Updata Institute Name  </label>
+                          <input value={updateValueInstitute}  onChange={(e)=> setUpdateValueInstitute(e.target.value)}  placeholder='Update Institute Name'
+                          className='max-w-[350px] h-[30px] bg-white my-2.5 p-2.5 border-2 block border-[#ccc]' type="text" />
                       </div>
                       <div>
-                          <label className='block text-xl font-bold' htmlFor="text">UpdataNumber  </label>
-                          <input onChange={Number} placeholder='Update Mobile Number'
-                          className=' h-[30px] bg-white my-2.5 p-2.5 border-2 block border-[#ccc]' type="number" />
+                          <label className='block text-[18px] font-bold' htmlFor="text">UpdataNumber  </label>
+                          <input value={updateValueNumber}  onChange={(e)=> setUpdateValueNumber(e.target.value)}  placeholder='Update Mobile Number'
+                          className='max-w-[350px] h-[30px] bg-white my-2.5 p-2.5 border-2 block border-[#ccc]' type="number" />
                       </div>
                     </div>
                 }
 
-                {  
-                !dataEdit ?
-                <button onClick={handleClick} 
-                className='p-[10px] bg-blue-600 cursor-pointer w-[150px] rounded-3xl text-white font-bold hover:bg-[#00264f] ' 
-                type="button">Submite</button> 
-                :
-                <button onClick={handleUpdate} 
-                className='p-[10px] bg-green-900 cursor-pointer w-[150px] rounded-3xl text-white font-bold hover:bg-green-600 ' 
-                type="button">Update</button>
-                } 
+                  {  
+                  !dataEdit ?
+                    <button onClick={handleClick} 
+                    className='p-[10px] bg-blue-600 cursor-pointer w-[150px] rounded-3xl text-white font-bold hover:bg-[#00264f] ' 
+                    type="submit">Submite</button> 
+                    :
+                    <div className='flex gap-3'>
+
+                      <button  onClick= {(e) => handleUpdate(e, updateId)} 
+                      className='p-[10px] bg-green-900 cursor-pointer w-[150px] rounded-3xl text-white font-bold hover:bg-green-600 ' 
+                      type="submit">Update</button>                 
+                      <button onClick={handleUpdateClear} 
+                      className='p-[10px] bg-red-500 cursor-pointer  rounded-3xl text-white font-bold hover:bg-red-600 ' 
+                      type="submit"> <GrClear /> </button> 
+                    
+                    </div>                                          
+                  } 
+
 
               </form>
             </div>  
@@ -244,7 +298,7 @@ const TodoList = () => {
                         <td className="px-6 py-2  text-[14px] w-[20%]">
                           {item.value.Number}
                         </td>
-                        <td onClick={updateData} 
+                        <td onClick={()=> updateData(item.value.Username, item.value.Institute, item.value.Number,  item.id)} 
                             className="px-3 py-2 text-center text-[22px] w-[2.5%]">
                            <MdModeEditOutline className='cursor-pointer text-[#007BFF] '/>
                         </td>
